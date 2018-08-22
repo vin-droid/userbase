@@ -23,6 +23,6 @@ const userSchema = mongoose.Schema(
         timestamps: true
     });
 // userSchema.createIndex({ "email": 1 }, { unique: true })
-userSchema.plugin(uniqueValidator);
+// userSchema.plugin(uniqueValidator);
 
 module.exports = mongoose.model('User', userSchema);

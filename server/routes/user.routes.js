@@ -2,6 +2,7 @@ const User = require('../app/models/user.model.js');
 const mongoose = require('mongoose');
 
 module.exports = (app) => {
+    // Create User
     app.post('/users', (req, res) => {
         const user =  new User({
             first_name: req.body.first_name,
@@ -25,9 +26,9 @@ module.exports = (app) => {
                 res.status(500).json(err);
             }
         );
-        
     });
 
+    // All Users
     app.get('/users', (req, res) => {
         User
         .find()
@@ -38,8 +39,11 @@ module.exports = (app) => {
         .catch(err => {
             res.status(500).json(err);
         });
-    })
+    });
+
+    // Find User by Id
     app.get('/user/:userId', (req, res) => {
+        validateValidUserId(req, res);
         User
             .findById(req.params.userId)
             .exec()
@@ -51,7 +55,33 @@ module.exports = (app) => {
             });;
     });
 
+    // Update User
     app.patch('/user/:userId',(req, res)=>{
+        validateValidUserId(req, res);
+        User.findByIdAndUpdate(req.params.userId, req.body, {new: true})
+        .exec()
+        .then(result => {
+            res.status(200).json(result);
+        })
+        .catch(err => {
+            res.status(500).json(err);
+        })
+    });
+
+    // Delete User
+    app.delete('/user/:userId', (req, res)=>{
+        validateValidUserId(req, res);
+        User.deleteOne({_id: req.params.userId})
+        .exec()
+        .then(result => {
+            res.status(200).json(result);
+        })
+        .catch(err => {
+            res.status(500).json(err);
+        })
+    });
+
+    const validateValidUserId = (req, res) =>{
         if (!mongoose.Types.ObjectId.isValid(req.params.userId)) {
             res.status(422).json(
                 {
@@ -68,13 +98,5 @@ module.exports = (app) => {
                     "name": "ValidationError"
                 });  
         }
-        User.findByIdAndUpdate(req.params.userId, req.body, {new: true})
-        .exec()
-        .then(result => {
-            res.status(200).json(result);
-        })
-        .catch(err => {
-            res.status(500).json(err);
-        })
-    })
+    }
 }
