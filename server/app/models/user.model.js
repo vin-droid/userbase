@@ -20,7 +20,8 @@ const userSchema = mongoose.Schema(
             }
     }, 
     {
-        timestamps: true
+        timestamps: true,
+        strict: false
     });
 // userSchema.createIndex({ "email": 1 }, { unique: true })
 // userSchema.plugin(uniqueValidator);

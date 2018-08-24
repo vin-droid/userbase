@@ -2,6 +2,7 @@ const User = require('../app/models/user.model.js');
 const mongoose = require('mongoose');
 const multer = require("multer");
 const path =  require('path');
+const XLSX = require('xlsx');
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
       cb(null, './public/uploads')
@@ -140,10 +141,23 @@ module.exports = (app) => {
         upload(req, res, (err)=>{
             if(err){
                 console.log("Error happened", err, req.file, req.body);
-                res.send("error occured");
+                res.json({"message":"error occured while uploading files"});
             }else{
-                console.log(req.file);
-                res.send("file uploaded");
+                const workbook = XLSX.readFile(req.file.path);
+                // console.log(workbook);
+                const sheet_name_list = workbook.SheetNames;
+                const userList = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]])
+                console.log("Sheat Name List",sheet_name_list[0]);
+                console.log("Json", workbook.Sheets[sheet_name_list[0]]);
+                console.log("Json Sheet", userList);
+                User.insertMany(userList, (err)=>{
+                    if (err) {
+                        res.json({ "message": "error occured while creating user." });
+                    } else {
+                        console.log("user created");
+                        res.json({ "message": "user created" });
+                    } 
+                });
             }
         })
     }); 
