@@ -6,3 +6,14 @@ export const playerModel  = {
     country_name: '',
     game: '',
 }
+
+export const userModel  = {
+    _id: '',
+    name: '',
+    email: '',
+    state: '',
+    dob: '',
+	mobile: '',
+    country: '',
+    game: ''
+}

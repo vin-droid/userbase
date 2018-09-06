@@ -6,6 +6,7 @@ import UserShow from './components/users/UserShow';
 import UserEdit from './components/users/UserEdit';
 import {BrowserRouter, Route, Switch} from 'react-router-dom';
 import Root from './components/layout/Root';
+import AdminPanel from './components/admin_panel';
 
 
 export const routes = () => (
@@ -17,6 +18,7 @@ export const routes = () => (
         <Route exact path='/users' component={UserList}/>
         <Route exact path='/user/:userId' component={UserShow}/>
         <Route exact path='/user/:userId/edit' component={UserEdit}/>
+        <Route exact path='/admin' component={AdminPanel}/>
       </Switch>
     </Root>
   </BrowserRouter>

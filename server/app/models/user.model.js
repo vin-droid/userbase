@@ -2,17 +2,21 @@ const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
 const userSchema = mongoose.Schema(
     {   
-        first_name: 
+        name: 
             { 
-                type: String, lowercase: true, trim: true, required: true
+                type: String, lowercase: true, trim: true
             },
-        last_name: 
+        dob: 
             { 
-                type: String, lowercase: true 
+                type: String 
+            },
+        mobile: 
+            { 
+                type: String 
             },
         email: 
             { 
-                type: String, lowercase: true, trim: true, unique: true, index: true  
+                type: String, lowercase: true, trim: true, index: true  
             },
         address: 
             {
@@ -25,5 +29,6 @@ const userSchema = mongoose.Schema(
     });
 // userSchema.createIndex({ "email": 1 }, { unique: true })
 // userSchema.plugin(uniqueValidator);
+userSchema.index( { email: 1, dob: 1, mobile: 1 }, { unique: true } )
 
 module.exports = mongoose.model('User', userSchema);

@@ -52,7 +52,7 @@ const validateValidUserId = (req, res) =>{
     }
 }
 
-module.exports = (app) => {
+module.exports = (app, db) => {
     // User Crud 
         // Create User
         app.post('/users', (req, res) => {
@@ -82,11 +82,25 @@ module.exports = (app) => {
 
         // All Users
         app.get('/users', (req, res) => {
+            // var dbo = mongoose.connection;
+            // console.log("dbo=============>",dbo);
+            // dbo.collection('users').find({}).toArray((err, result)=>{
+            //     if (err){
+            //        res.status(500).json(err); 
+            //    }else{
+            //     res.json(result);
+            //    }
+            // });
+            console.log("fetching user list");
             User
             .find()
+            .skip(parseInt(req.query.offset))
+            .limit(parseInt(req.query.limit))
+            .lean()
             .exec()
             .then(result => {
-                res.json(result);
+                // console.log(result);
+                res.json({total_count: result.length, users: result });
             })
             .catch(err => {
                 res.status(500).json(err);
@@ -143,23 +157,44 @@ module.exports = (app) => {
                 console.log("Error happened", err, req.file, req.body);
                 res.json({"message":"error occured while uploading files"});
             }else{
+                console.log("file uploaded");
+                console.log("file dATA", req.file, req.body);
                 const workbook = XLSX.readFile(req.file.path);
-                // console.log(workbook);
                 const sheet_name_list = workbook.SheetNames;
                 const userList = XLSX.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]])
-                console.log("Sheat Name List",sheet_name_list[0]);
-                console.log("Json", workbook.Sheets[sheet_name_list[0]]);
-                console.log("Json Sheet", userList);
-                User.insertMany(userList, (err)=>{
-                    if (err) {
-                        res.json({ "message": "error occured while creating user." });
-                    } else {
-                        console.log("user created");
-                        res.json({ "message": "user created" });
-                    } 
-                });
+                var remainder = userList.length % 1000;
+                var is_error = false;
+                console.log("remainder", remainder);
+                console.log("usserlist  length", userList.length);
+
+                while (userList.length >= remainder){
+                    User.insertMany(userList.splice(0, 1000))
+                    .then(result => {
+                        is_error = false;
+                    })
+                    .catch(err => {
+                        is_error = true;
+                        res.status(500).json(err);
+                    });
+                    console.log(1000, "user inserted=============and userlist length", userList.length  );
+                }
+
+                if (!is_error){
+                    res.status(201).json(
+                        {
+                            message: "User created"
+                        }
+                    );
+                }
             }
         })
     }); 
-      
+    
+    function renameKeys(obj, newKeys) {
+        const keyValues = Object.keys(obj).map(key => {
+            const newKey = newKeys[key] || key;
+            return { [newKey]: obj[key] };
+        });
+        return Object.assign({}, ...keyValues);
+    }
 }
